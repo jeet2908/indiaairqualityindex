@@ -1,0 +1,63 @@
+#1) Retrieve all records for a specific city (e.g., Mumbai)?
+SELECT * FROM Airquality
+WHERE City = "Mumbai";
+
+#2) Find the average AQI value for each state?
+SELECT State,ROUND(AVG(CurrentAQIvalue),2) AS Avg_AQI
+FROM Airquality
+GROUP BY State;
+
+#3) Identify cities where AQI is above a certain threshold (e.g., AQI > 200)?
+SELECT City, CurrentAQIvalue
+FROM Airquality
+WHERE CurrentAQIvalue > 200
+ORDER BY CurrentAQIvalue DESC;
+
+#4) Count the number of records with insufficient data?
+SELECT COUNT(*) AS Insufficient_Data_Count
+FROM Airquality
+WHERE CurrentAQIvalue = 'Insufficient data available in last 24 hours';
+
+#5) Find the highest AQI value along with the corresponding city and state?
+Select city , state , currentAQIvalue
+From Airquality
+Order by currentAQIvalue DESC
+LIMIT 1;
+
+#6) Calculate the overall average AQI for the entire dataset?
+SELECT ROUND(AVG(CurrentAQIvalue),2) AS Overall_average_AQI
+FROM Airquality;
+
+#7) Retrieve records for states with more than five city ?
+SELECT State, COUNT(DISTINCT City) AS No_of_cities
+FROM Airquality
+GROUP BY State
+HAVING No_of_cities > 5;
+
+#8) Find the cities in a specific state with AQI less than 50 ?
+SELECT City,CurrentAQIvalue
+FROM Airquality
+WHERE CurrentAQIvalue < 50
+ORDER BY CurrentAQIvalue ASC;
+
+#9) Categorize AQI values into different pollution levels ?
+SELECT City,CurrentAQIvalue,
+CASE
+	WHEN CurrentAQIvalue <= 50 THEN 'Good'
+    WHEN CurrentAQIvalue <= 100 THEN 'Moderate'
+    WHEN CurrentAQIvalue <= 150 THEN 'Unhealthy for Sensitive Groups'
+    WHEN CurrentAQIvalue <= 200 THEN 'Unhealthy'
+    WHEN CurrentAQIvalue <= 300 THEN 'Very Unhealthy'
+    ELSE 'Hazardous'
+END AS Pollution_level
+FROM Airquality
+WHERE CurrentAQIvalue IS NOT NULL;
+
+#10) find cities with the Lowest AQI values in each state and rank top 1 ?
+WITH Lowest_AQI AS (
+SELECT DISTINCT City,CurrentAQIvalue,State,
+RANK() OVER(PARTITION BY State ORDER BY CurrentAQIvalue ASC) AS Lowest_AQI_rank
+FROM Airquality)
+SELECT City,State,CurrentAQIvalue,Lowest_AQI_rank
+FROM Lowest_AQI
+LIMIT 1;
